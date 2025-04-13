@@ -5,7 +5,7 @@ from jsonschema import validate
 from jsonschema.exceptions import ValidationError
 
 
-def validate_json(payload: json):
+def validate_json(payload):
     """
     This method is used to verify that the JSON payload is compliant with the FaaSr schema
     """
@@ -47,11 +47,11 @@ def is_cyclic(adj_graph, curr, visited, stack):
         if child not in visited and is_cyclic(adj_graph, child, visited, stack):
             err = '{\"faasr_check_workflow_cycle\":\"Function loop found from node ' + curr + ' to ' + child + '\"}\n'
             print(err)
-            quit()
+            sys.exit(1)
         elif child in stack:
             err = '{\"faasr_check_workflow_cycle\":\"Function loop found from node ' + curr + ' to ' + child + '\"}\n'
             print(err)
-            quit()
+            sys.exit(1)
     
     # no more successors to visit for this branch and no cycles found
     # remove current node from recursion call stack
@@ -107,7 +107,7 @@ def check_dag(payload: dict):
         if func not in visited:
             err = '{\"check_workflow_cycle\":\"unreachable state is found in ' + func + '\"}\n'
             print(err)
-            quit()
+            sys.exit(1)
 
     return pre[payload['FunctionInvoke']]
     

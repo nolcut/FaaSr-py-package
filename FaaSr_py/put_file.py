@@ -11,8 +11,7 @@ def faasr_put_file(
     This function puts an object in S3 bucket
     """
     # to-do: config
-    faasr = faasr_env.get_faasr()
-    config = faasr.get_payload_dict()
+    config = faasr_env.get_faasr()
 
     if server_name == "":
         server_name = config["DefaultDataStore"]

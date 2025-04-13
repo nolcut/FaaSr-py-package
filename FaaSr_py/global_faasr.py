@@ -4,7 +4,7 @@ from .faasr_payload import FaaSr
 
 faasr = None
 
-def initialize_faasr(payload_json: json):
+def initialize_faasr(payload_json):
     global faasr
     faasr = FaaSr(payload_json)
     return faasr

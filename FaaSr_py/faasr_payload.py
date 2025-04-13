@@ -20,6 +20,15 @@ class FaaSr:
         else:
             ValueError("Payload failed to validate.")
 
+    def __getitem__(self, key):
+        try:
+            return self.payload_dict[key]
+        except KeyError as e:
+            print(str(e))
+
+    def __setitem__(self, key, value):
+        self.payload_dict[key] = value
+
     def get_payload_dict(self):
         return self.payload_dict
 
@@ -260,7 +269,7 @@ class FaaSr:
         # ensure user function is in imported_functions
         if imported_functions and func_name in imported_functions:
             user_function = imported_functions[func_name]
-            # add FaaSr_py to user function's namespace
+            # add faasr_py to user_function's namespace
             user_function.__globals__['FaaSr_py'] = FaaSr_py
         else:
             err_msg = '{"faasr_run_user_function":"Cannot find Function ' + func_name + ', check the name and sources"}\n'

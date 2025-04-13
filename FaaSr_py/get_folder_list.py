@@ -1,4 +1,5 @@
 import boto3
+import sys
 from . import global_faasr as faasr_env
 
 def faasr_get_folder_list(server_name="", faasr_prefix = ""):
@@ -6,8 +7,7 @@ def faasr_get_folder_list(server_name="", faasr_prefix = ""):
     This function gets a list of objects in the S3 bucket
     """
     # to-do: config
-    faasr = faasr_env.get_faasr()
-    config = faasr.get_payload_dict()
+    config = faasr_env.get_faasr()
 
 
     if server_name == "":
@@ -16,7 +16,7 @@ def faasr_get_folder_list(server_name="", faasr_prefix = ""):
     if server_name not in config['DataStores']:
         err_msg = '{\"faasr_get_folder_list\":\"Invalid data server name: ' + server_name + '\"}\n'
         print(err_msg)
-        quit()
+        sys.exit(1)
     
     target_s3 = config['DataStores'][server_name]
 

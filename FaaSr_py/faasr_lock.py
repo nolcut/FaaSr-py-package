@@ -1,14 +1,14 @@
 import random
 import time
+import sys
 import boto3
-from .faasr_payload import FaaSr
 
 
-def faasr_rsm(faasr):
+
+def faasr_rsm(faasr_payload):
     """
     Read and set memomry implemntation for creating a faasr lock in s3
     """
-    faasr_payload = faasr.payload_dict
 
     # set env for flag and lock
     flag_content = random.randint(1, 2**31 - 1)
@@ -17,7 +17,7 @@ def faasr_rsm(faasr):
     lock_name = f"{faasr_payload['FaaSrLog']}/{faasr_payload['InvocationID']}/{faasr_payload['FunctionInvoke']}./lock"
 
     # set env for storage
-    logging_server = faasr.get_logging_server()
+    logging_server = faasr_payload.get_logging_server()
     target_s3 = faasr_payload['DataStores'][logging_server]
 
     print(target_s3)
@@ -39,7 +39,7 @@ def faasr_rsm(faasr):
         # put an object with the name log/functionname/flag/{random_intger} into the S3 bucket
         response = s3_client.put_object(Key=flag_name, Bucket=target_s3['Bucket'])
         # if someone has a flag, then delete flag and try again
-        if(anyone_else_interested(faasr, target_s3, flag_path, flag_name)):
+        if(anyone_else_interested(target_s3, flag_path, flag_name)):
             s3_client.delete_object(Bucket = target_s3['Bucket'], Key = flag_name)
             if(cnt > max_cnt):
                 print('max spinning')
@@ -49,7 +49,7 @@ def faasr_rsm(faasr):
                 if(cnt > max_wait):
                     err_msg = '{\"faasr_rsm\":\"Lock Timeout\"}\n'
                     print(err_msg)
-                    quit()
+                    sys.exit(1)
             else:
                 print('spinning')
                 time.sleep(2 ** cnt)
@@ -88,7 +88,7 @@ def faasr_acquire(faasr):
                 if (cnt > max_wait):
                     err_msg = '{\"faasr_acquire\":\"Lock Acquire Timeout\"}\n'
                     print(err_msg)
-                    quit()
+                    sys.exit(1)
             else:
                 print('acquire spinning')
                 time.sleep(2 ** cnt)
@@ -96,15 +96,14 @@ def faasr_acquire(faasr):
         lock = faasr_rsm(faasr)
 
 
-def faasr_release(faasr):
+def faasr_release(faasr_payload):
     """
     This function releases the lock by deleting the lock object from s3
     """
-    faasr_payload = faasr.payload_dict
 
     lock_name = f"{faasr_payload['FaaSrLog']}/{faasr_payload['InvocationID']}/{faasr_payload['FunctionInvoke']}./lock"
 
-    logging_server = faasr.get_logging_server()
+    logging_server = faasr_payload.get_logging_server()
     target_s3 = faasr_payload['DataStores'][logging_server]
 
     s3_client = boto3.client(
@@ -119,7 +118,7 @@ def faasr_release(faasr):
 
 
 
-def anyone_else_interested(faasr, target_s3, flag_path, flag_name):
+def anyone_else_interested(target_s3, flag_path, flag_name):
     """
     This function checks flags to see whether or not other
     functions are trying to acquire the lock

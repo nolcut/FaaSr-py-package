@@ -1,6 +1,7 @@
 import boto3
 import re
 import os
+import sys
 from . import global_faasr as faasr_env
 
 def faasr_get_file(local_file, remote_file, server_name="", local_folder=".", remote_folder="."):
@@ -8,8 +9,7 @@ def faasr_get_file(local_file, remote_file, server_name="", local_folder=".", re
     This function downloads a file from S3
     """
     # to-do: config
-    faasr = faasr_env.get_faasr()
-    config = faasr.get_payload_dict()
+    config = faasr_env.get_faasr()
 
     if server_name == "":
         server_name = config['DefaultDataStore']
@@ -17,7 +17,7 @@ def faasr_get_file(local_file, remote_file, server_name="", local_folder=".", re
     if server_name not in config['DataStores']:
         err_msg = '{\"faasr_get_file\":\"Invalid data server name: ' + server_name + '\"}\n'
         print(err_msg)
-        quit()
+        sys.exit(1)
 
     target_s3 = config['DataStores'][server_name]
     

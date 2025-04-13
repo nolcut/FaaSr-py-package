@@ -8,11 +8,9 @@ def faasr_log(log_message):
     """
     This function logs a message in the FaaSr log
     """
-    faasr_obj = faasr_env.get_faasr()
+    payload = faasr_env.get_faasr()
 
-    log_server_name = faasr_obj.get_logging_server()
-
-    payload = faasr_obj.get_payload_dict()
+    log_server_name = payload.get_logging_server()
 
     if log_server_name not in payload["DataStores"]:
         err_msg = (
