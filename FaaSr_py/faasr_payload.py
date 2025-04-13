@@ -7,12 +7,10 @@ import copy
 import requests
 import os
 import sys
+import FaaSr_py
 from collections import defaultdict
 from .s3_helper_functions import validate_uuid
 from .graph_functions import validate_json
-from .log import faasr_log
-from .put_file import faasr_put_file
-
 
 
 class FaaSr:
@@ -262,9 +260,11 @@ class FaaSr:
         # ensure
         if imported_functions and func_name in imported_functions:
             user_function = imported_functions[func_name]
+            # import FaaSr_py
+            user_function.FaaSr_py = FaaSr_py
         else:
             err_msg = '{"faasr_run_user_function":"Cannot find Function ' + func_name + ', check the name and sources"}\n'
-            result_2 = faasr_log(err_msg)
+            result_2 = FaaSr_py.faasr_log(err_msg)
             print(err_msg)
             sys.exit(1)
 
@@ -277,7 +277,7 @@ class FaaSr:
         except Exception as e:
             nat_err_msg = f'"faasr_run_user_function":Errors in the user function {repr(e)}'
             err_msg = '{"faasr_run_user_function":"Errors in the user function: ' + self.payload_dict["FunctionInvoke"] + ', check the log for the detail "}\n'
-            result_2 = faasr_log(nat_err_msg)
+            result_2 = FaaSr_py.faasr_log(nat_err_msg)
             print(nat_err_msg)
             print(err_msg)
             sys.exit(1)
@@ -299,7 +299,7 @@ class FaaSr:
         file_path = f"{log_folder}/{file_name}"
         with open(file_path, "w") as f:
             f.write("TRUE")
-        faasr_put_file(
+        FaaSr_py.faasr_put_file(
             local_folder=log_folder,
             local_file=file_name,
             remote_folder=log_folder,
