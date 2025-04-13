@@ -257,7 +257,7 @@ class FaaSr:
         curr_action = faasr_dict["FunctionInvoke"]
         func_name = faasr_dict["FunctionList"][curr_action]["FunctionName"]
 
-        # ensure
+        # ensure user function is in imported_functions
         if imported_functions and func_name in imported_functions:
             user_function = imported_functions[func_name]
             # import FaaSr_py
@@ -331,7 +331,7 @@ class FaaSr:
         if len(invoke_next) == 0:
             msg = '{\"faasr_trigger\":\"no triggers for ' + curr_func + '\"}\n'
             print(msg)
-            faasr_log(msg)
+            FaaSr_py.faasr_log(msg)
             return
 
 
@@ -361,7 +361,7 @@ class FaaSr:
                 if next_server not in faasr_dict['ComputeServers']:
                     err_msg = '{\"faasr_trigger\":\"invalid server name: ' + next_server + '\"}\n'
                     print(err_msg)
-                    faasr_log(err_msg)
+                    FaaSr_py.faasr_log(err_msg)
                     break
 
 
@@ -438,23 +438,23 @@ class FaaSr:
                         if response.status_code == 204:
                             succ_msg = f"faasr_trigger: GitHub Action: Successfully invoked: {faasr_dict['FunctionInvoke']}\n"
                             print(succ_msg)
-                            faasr_log(succ_msg)
+                            FaaSr_py.faasr_log(succ_msg)
                         elif response.status_code == 401:
                             err_msg = "faasr_trigger: GitHub Action: Authentication failed, check the credentials\n"
                             print(err_msg)
-                            faasr_log(err_msg)
+                            FaaSr_py.faasr_log(err_msg)
                         elif response.status_code == 404:
                             err_msg = "faasr_trigger: GitHub Action: Cannot find the destination, check the repo name: \"" + repo + "\" and workflow name: \"" + workflow_file + "\"\n"
                             print(err_msg)
-                            faasr_log(err_msg)
+                            FaaSr_py.faasr_log(err_msg)
                         elif response.status_code == 422:
                             err_msg = "faasr_trigger: GitHub Action: Cannot find the destination, check the ref: " + faasr_dict["FunctionInvoke"] + "\n"
                             print(err_msg)
-                            faasr_log(err_msg)
+                            FaaSr_py.faasr_log(err_msg)
                         else:
                             err_msg = "faasr_trigger: GitHub Action: unknown error happens when invoke next function\n"
                             print(err_msg)
-                            faasr_log(err_msg)
+                            FaaSr_py.faasr_log(err_msg)
 
 
 
