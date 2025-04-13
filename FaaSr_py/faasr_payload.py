@@ -260,8 +260,8 @@ class FaaSr:
         # ensure user function is in imported_functions
         if imported_functions and func_name in imported_functions:
             user_function = imported_functions[func_name]
-            # import FaaSr_py
-            user_function.FaaSr_py = FaaSr_py
+            # add FaaSr_py to user function's namespace
+            user_function.__globals__['FaaSr_py'] = FaaSr_py
         else:
             err_msg = '{"faasr_run_user_function":"Cannot find Function ' + func_name + ', check the name and sources"}\n'
             result_2 = FaaSr_py.faasr_log(err_msg)
