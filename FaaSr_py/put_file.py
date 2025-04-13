@@ -4,23 +4,24 @@ from pathlib import Path
 from . import global_faasr as faasr_env
 
 
-def faasr_put_file(
-    local_file, remote_file, server_name="", local_folder=".", remote_folder="."
-):
+def faasr_put_file(local_file, remote_file, server_name="", local_folder=".", remote_folder="."):
     """
     This function puts an object in S3 bucket
     """
     # to-do: config
     config = faasr_env.get_faasr()
 
+    # Get the server name from payload if it is not provided
     if server_name == "":
         server_name = config["DefaultDataStore"]
 
+    # Ensure that the server name is valid
     if server_name not in config["DataStores"]:
         err_msg = '{"faasr_put_file":"Invalid data server name: ' + server_name + '"}\n'
         print(err_msg)
         quit()
 
+    # Get the S3 server to put the file in
     target_s3 = config["DataStores"][server_name]
 
     # Remove "/" in the folder & file name to avoid situations:
@@ -30,12 +31,15 @@ def faasr_put_file(
     remote_folder = re.sub(r"/+", "/", remote_folder.rstrip("/"))
     remote_file = re.sub(r"/+", "/", remote_file.rstrip("/"))
 
+    # Path for remote file
     put_file_s3 = f"{remote_folder}/{remote_file}"
 
+    # If the local file exists in the current working directory, then set put_file to the name of the file
+    # Otherwise, construct valid path to the file
     local_file_path = Path(local_file)
-    if local_folder == "." and local_file == local_file_path.expanduser().resolve(
-        strict=False
-    ):
+    # Check if local_folder is "." and local_file contains path information
+    if local_folder == "." and str(local_file_path) != local_file_path.name:
+        # local_file has directory components
         local_folder = str(local_file_path.parent)
         put_file = local_file
     else:

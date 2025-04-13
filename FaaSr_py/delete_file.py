@@ -5,19 +5,22 @@ from . import global_faasr as faasr_env
 
 def faasr_delete_file(remote_file, server_name="", remote_folder=""):
     """
-    This function deletes a file from S3 bucket
+    This function deletes a file from S3
     """
     # to-do: config
     config = faasr_env.get_faasr()
 
+    # Get server name from payload if one isn't provided
     if server_name == "":
         server_name = config['DefaultDataStore']
 
+    # Ensure that the server is a valid data store
     if server_name not in config['DataStores']:
         err_msg = '{\"faasr_delete_file\":\"Invalid data server name: ' + server_name + '\"}\n'
         print(err_msg)
         sys.exit(1)
     
+    # Get the S3 data store to delete file from
     target_s3 = config['DataStores'][server_name]
 
     # Remove "/" in the folder & file name to avoid situations:x
@@ -27,6 +30,7 @@ def faasr_delete_file(remote_file, server_name="", remote_folder=""):
     remote_folder = re.sub(r'/+', '/', remote_folder.rstrip('/'))
     remote_file = re.sub(r'/+', '/', remote_file.rstrip('/'))
 
+    # Name of file to delete from S3
     delete_file_s3 = f"{remote_folder}/{remote_file}"
 
     s3_client = boto3.client(
@@ -37,4 +41,5 @@ def faasr_delete_file(remote_file, server_name="", remote_folder=""):
         endpoint_url = target_s3['Endpoint']
         )
     
+    # Delete file from S3
     result = s3_client.delete_object(Bucket = target_s3['Bucket'], Key = delete_file_s3)

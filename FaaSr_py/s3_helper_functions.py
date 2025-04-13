@@ -12,7 +12,7 @@ def validate_uuid(uuid_value):
     if not isinstance(uuid_value, str):
         return False
     
-    # if uuid.UUID raises an exception, then the uuid is invalid
+    # If uuid.UUID raises an exception, then the uuid is invalid
     try:
         uuid_check = uuid.UUID(uuid_value)
     except (ValueError):

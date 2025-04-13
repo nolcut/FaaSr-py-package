@@ -64,13 +64,12 @@ def check_dag(payload: dict):
     This method checks for cycles, repeated function names, or unreachable nodes in the workflow
     and aborts if it finds any
 
-    returns adjacency graph for the workflow
+    returns a list of predecessors for the current function
     """
 
-    # create adjacency list
     adj_graph = defaultdict(list)
 
-    # build the adjacency list
+    # Build the adjacency list
     for func in payload['FunctionList'].keys():
         invoke_next = payload['FunctionList'][func]['InvokeNext']
         if isinstance(invoke_next, str):
@@ -78,31 +77,37 @@ def check_dag(payload: dict):
         for child in invoke_next:
             adj_graph[func].append(child)
 
-    # create empty recursion call stack
+    # Initialize empty recursion call stack
     stack = []
 
-    # create empty visited set
+    # Initialize empty visited set
     visited = set()
 
-    # create predecessor list
+    # Initialize predecessor list
     pre = predecessors_list(adj_graph)
     
-    # find first function
+    # Find initial function in the graph
     start = False
     for func in payload['FunctionList']:
         if len(pre[func]) == 0:
             start = True
+            # This function stores the first function with no predecessors
+            # In the cases where there is multiple functions with no
+            # predecessors, an unreachable state error will occur later
             first_func = func
+            break
 
-    # ensure there is an initial action
+    # Ensure there is an initial action
     if start is False:
         err_msg = '{\"faasr_check_workflow_cycle\":\"function loop found: no initial action\"}\n'
         print(err_msg)
         sys.exit(1)
 
-    #check for cycles
+    # Check for cycles
     is_cyclic(adj_graph, first_func, visited, stack)
 
+    # Check if all of the functions have been visited by the DFS
+    # If not, then there is an unreachable state in the graph
     for func in payload['FunctionList'].keys():
         if func not in visited:
             err = '{\"check_workflow_cycle\":\"unreachable state is found in ' + func + '\"}\n'
@@ -113,8 +118,7 @@ def check_dag(payload: dict):
     
 
 def predecessors_list(adj_graph):
-    """This function returns creates a graph mapping functions to their predecessor functions
-    as a dictionary (function: list[predecessor])
+    """This function returns creates a dict mapping functions to their predecessor functions
     
     parameters:
         adj_graph(dict): adjacency list for graph (function: successor)
@@ -126,13 +130,17 @@ def predecessors_list(adj_graph):
     return pre 
 
 
-# replace filler credentials in payload with real credentials
 def faasr_replace_values(payload, secrets):
+    """
+    Replaces filler secrets in a payload with real credentials
+    """
     ignore_keys = ["FunctionGitRepo", "FunctionList", "FunctionCRANPackage", "FunctionGitHubPackage"]
     for name in payload:
         if name not in ignore_keys:
+            # If the value is a list or dict, recurse
             if isinstance(payload[name], list) or isinstance(payload[name], dict):
                 payload[name] = faasr_replace_values(payload[name], secrets)
+            # Replace value
             elif payload[name] in secrets:
                 payload[name] = secrets[payload[name]]
     return payload
