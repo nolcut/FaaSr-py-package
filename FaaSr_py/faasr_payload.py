@@ -46,10 +46,9 @@ class FaaSr:
             err_msg = '{"get_payload_json":"self.payload_dict must be a dictionary"}\n'
             print(err_msg)
 
-
     def s3_check(self):
         """
-        This function ensures that all of the S3 data stores are valid and reachable
+        This method ensures that all of the S3 data stores are valid and reachable
         """
         
         # Iterate through all of the data stores
@@ -95,7 +94,7 @@ class FaaSr:
 
     def init_log_folder(self):
         """
-        Initializes a faasr log folder if one has not already been created
+        This method initializes a faasr log folder if one has not already been created
         """
         # Create invocation ID if one is not already present
         if validate_uuid(self.payload_dict["InvocationID"]) == False:
@@ -140,10 +139,9 @@ class FaaSr:
 
     def abort_on_multiple_invocations(self, pre):
         """
-        Invoked when the current function has multiple predecessors
-        
-        Aborts if they have not finished or the current function was not the first
-        to write to the candidate set
+        This method is invoked when the current function has multiple predecessors
+        and aborts if they have not finished or the current function instance was not
+        the first to write to the candidate set
         """
 
         # Get S3 logging data store
@@ -267,7 +265,7 @@ class FaaSr:
 
     def get_logging_server(self):
         """
-        Gets the default logging data store from the payload
+        Returns the default logging data store for the payload
         """
         if self.payload_dict["LoggingDataStore"] is None:
             logging_server = self.payload_dict["DefaultDataStore"]
@@ -278,7 +276,7 @@ class FaaSr:
 
     def run_user_function(self, imported_functions):
         """
-        Runs the user's code that was imported from git repo
+        This method runs the user's code that was imported
         """
         faasr_dict = self.payload_dict
         curr_action = faasr_dict["FunctionInvoke"]
@@ -303,7 +301,7 @@ class FaaSr:
             user_function(**user_args)
         except Exception as e:
             nat_err_msg = f'"faasr_run_user_function":Errors in the user function {repr(e)}'
-            err_msg = '{"faasr_run_user_function":"Errors in the user function: ' + self.payload_dict["FunctionInvoke"] + ', check the log for the detail "}\n'
+            err_msg = '{"faasr_run_user_function":"Errors in the user function: ' + str(self.payload_dict["FunctionInvoke"]) + ', check the log for the detail "}\n'
             result_2 = FaaSr_py.faasr_log(nat_err_msg)
             print(nat_err_msg)
             print(err_msg)
@@ -336,7 +334,7 @@ class FaaSr:
     
     def get_user_function_args(self):
         """
-        Gets function arguments from FaaSr JSON
+        Returns function arguments
         """
         user_action = self.payload_dict["FunctionInvoke"]
 
@@ -346,12 +344,10 @@ class FaaSr:
         else:
             return args
         
-
     def trigger(self):
         """
-        Triggers the next actions in the DAG
+        This method triggers the next actions in the DAG
         """
-        
         # Get a list of the next functions to invoke
         faasr_dict = self.payload_dict
         curr_func = faasr_dict['FunctionInvoke']
@@ -365,7 +361,6 @@ class FaaSr:
             print(msg)
             FaaSr_py.faasr_log(msg)
             return
-
 
         for next_function in invoke_next:
             # Split function name and rank if needed
@@ -503,6 +498,7 @@ class FaaSr:
                             headers = post_headers
                         )
 
+                        # Log response
                         if response.status_code == 204:
                             succ_msg = f"{{faasr_trigger: GitHub Action: Successfully invoked: {faasr_dict['FunctionInvoke']}}}\n"
                             print(succ_msg)
