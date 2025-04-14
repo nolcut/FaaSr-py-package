@@ -39,7 +39,6 @@ The GUI for creating a workflow can be found here: [FaaSr-JSON-Builder Shiny app
 3. Subsequent actions are invoked
 
 # Structure of a JSON workflow
-The FaaSr schema is composed of 7 primary components:
 
 ## “ComputeServers”
 List of FaaS compute servers. Each FaaS type requires different attributes:
