@@ -1,9 +1,9 @@
 # What is FaaSr_py
 FaaSr_py is a package for Python that makes it easier to orchestrate serverless workflows by abstracting away provider specific APIs and allowing for DAG defined execution flow. 
 Currently, FaaSr_py supports three FaaS platforms: GitHub actions, OpenWhisk (soon), and AWS Lambda (soon). Functions within the workflow can be written in either R or Python. 
-Workflows leverages S3 for persistent data-storage, with a built in server side API to orchestrate I/O for user functions. Every function in the DAG is a container that will run on the user’s FaaS server of choice. 
+Every function in the DAG is a container that will run on the user’s FaaS server of choice. 
 This package provides backend tools for S3 and DAG validation, package installation, function fetching and execution, a triggering mechanism for the next functions in the DAG, 
-and other validation functions to ensure proper workflow behavior. Additionally, the package includes server side functions that can be included in user functions to interact with S3 data stores.
+and other validation functions to ensure proper workflow behavior. Workflows leverages S3 for persistent data-storage, with a built in server side API to orchestrate I/O within user functions.
 
 # Using FaaSr_py
 To use FaaSr_py, you simply need to create a workflow JSON (see below) and host your functions on GitHub. Then, you can register, invoke, and set triggers for your workflows using the CLI (soon).    
