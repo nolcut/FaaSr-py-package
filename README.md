@@ -35,10 +35,11 @@ The GUI for creating a workflow can be found here: [FaaSr-JSON-Builder Shiny app
 
 # Basic structure of an action in the workflow:
 1. Workflow JSON is validated
-2. User function is executed
-3. Subsequent actions are invoked
+2. InvocationID is assigned and the log folder is created (if they aren't already)
+3. User function is executed
+4. Subsequent actions are invoked
 
-# Structure of a JSON workflow
+# JSON workflow format
 
 ## “ComputeServers”
 List of FaaS compute servers. Each FaaS type requires different attributes:
