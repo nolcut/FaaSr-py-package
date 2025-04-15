@@ -39,6 +39,12 @@ The GUI for creating a workflow can be found here: [FaaSr-JSON-Builder Shiny app
 3. User function is executed
 4. Subsequent actions are invoked
 
+# Useful containers
+For running Python functions on GitHub Action servers, you can use the following container: 
+```
+ghcr.io/nolcut/github-actions-python:v0.1.1
+```
+
 # JSON workflow format
 
 ## “ComputeServers”
