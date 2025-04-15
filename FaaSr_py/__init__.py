@@ -11,6 +11,8 @@ from .delete_file import faasr_delete_file
 from .get_file import faasr_get_file
 from .get_folder_list import faasr_get_folder_list
 from .log import faasr_log
+from .faasr_lock import faasr_acquire
+from .faasr_lock import faasr_release
 
 __all__ = [
     # modules
@@ -33,5 +35,7 @@ __all__ = [
     "faasr_delete_file",
     "faasr_get_folder_list",
     "faasr_log",
-    "faasr_put_file"
+    "faasr_put_file",
+    "faasr_release",
+    "faasr_acquire"
 ]
