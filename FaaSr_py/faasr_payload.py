@@ -219,7 +219,7 @@ class FaaSr:
         random_number = random.randint(1, 2**31 - 1)
 
         if not os.path.isdir(id_folder):
-            os.mkdir(id_folder)
+            os.makedirs(id_folder, exist_ok=True)
 
         candidate_path = f"{id_folder}/{self.payload_dict['FunctionInvoke']}.candidate"
 
@@ -228,8 +228,9 @@ class FaaSr:
             Bucket=s3_log_info["Bucket"], prefix=candidate_path
         )
         if len(s3_response["Contents"]) != 0:
+            # Download candidate set
             if os.path.exists(candidate_path):
-                os.remove(candidate_path)
+                os.remove(candidate_path)          
             s3_client.download_file(
                 Bucket=s3_log_info["Bucket"],
                 Key=candidate_path,
