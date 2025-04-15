@@ -172,6 +172,8 @@ class FaaSr:
                 pre = pre.remove(pre_func)
                 if len(parts) != 2:
                     err_msg = f'{{\"faasr_abort_on_multiple_invocation\": \"Error with rank field in function: {self.payload_dict["FunctionList"][pre_func]}\"}}'
+                    print(err_msg)
+                    sys.exit(1)
                 for rank in range(1, parts[1] + 1):
                     pre.append(f"{pre_func}.{rank}")
 
