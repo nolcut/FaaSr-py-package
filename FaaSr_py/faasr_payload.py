@@ -75,20 +75,17 @@ class FaaSr:
             s3_client = boto3.client(
                 "s3",
                 aws_access_key_id=self.payload_dict["DataStores"][server]["AccessKey"],
-                aws_secret_access_key=self.payload_dict["DataStores"][server][
-                    "SecretKey"
-                ],
+                aws_secret_access_key=self.payload_dict["DataStores"][server]["SecretKey"],
                 region_name=self.payload_dict["DataStores"][server]["Region"],
                 endpoint_url=self.payload_dict["DataStores"][server]["Endpoint"],
             )
             # Use boto3 head bucket to ensure that the bucket exists and that we have acces to it
-            bucket_check = s3_client.head_bucket(
-                Bucket=self.payload_dict["DataStores"][server]["Bucket"]
-            )
-
-            # If bucket check does not return a dict, then the data store is unreachable
-            if not isinstance(bucket_check, dict):
-                error_message = f'{{"s3_check":"S3 server {server} failed with message: Data store server unreachable"}}\n'
+            try:
+                bucket_check = s3_client.head_bucket(
+                    Bucket=self.payload_dict["DataStores"][server]["Bucket"]
+                )
+            except Exception as e:
+                error_message = f'{{"s3_check":"S3 server {server} failed with message: {e}}}\n'
                 print(error_message)
                 sys.exit(1)
 
@@ -173,8 +170,8 @@ class FaaSr:
             if "Rank" in self.payload_dict["FunctionList"][pre_func]:
                 parts = self.payload_dict["FunctionList"][pre_func]["Rank"].split("/")
                 pre = pre.remove(pre_func)
-            for rank in range(1, parts[1] + 1):
-                pre.append(f"{pre_func}.{rank}")
+                for rank in range(1, parts[1] + 1):
+                    pre.append(f"{pre_func}.{rank}")
 
         # First, we check if all of the other predecessor actions are done
         # To do this, we check a file called func.done in S3, and see if all of the other actions have
@@ -198,7 +195,7 @@ class FaaSr:
             # if it does not exist, then the current function still is waiting for
             # a predecessor and must wait
             if done_file not in s3_object_keys:
-                res_msg = '{"fabort_on_multiple_invocations":"not the last trigger invoked - no flag"}\n'
+                res_msg = '{"faasr_abort_on_multiple_invocations":"not the last trigger invoked - no flag"}\n'
                 print(res_msg)
                 sys.exit(1)
 
@@ -299,7 +296,7 @@ class FaaSr:
         # Run user function
         try:
             user_function(**user_args)
-        except Exception as e:
+        except Exception:
             nat_err_msg = f'"faasr_run_user_function":Errors in the user function {repr(e)}'
             err_msg = '{"faasr_run_user_function":"Errors in the user function: ' + str(self.payload_dict["FunctionInvoke"]) + ', check the log for the detail "}\n'
             result_2 = FaaSr_py.faasr_log(nat_err_msg)
@@ -395,9 +392,9 @@ class FaaSr:
                 next_server_type = next_compute_server["FaaSType"]
 
                 match(next_server_type):
-                    # to-do: OW and lambda triggers
+                    # to-do: OW and lambda testing
                     case "OpenWhisk":
-                        print("OpenWhisk trigger not implemented")
+                        print("OpenWhisk trigger not implemented (need to test)")
                         # Get ow credentials
                         endpoint = next_compute_server["Endpoint"]
                         api_key = next_compute_server["API.key"]
@@ -407,7 +404,7 @@ class FaaSr:
                         if "SSL" not in next_compute_server or len(next_compute_server["SSL"]) == 0:
                             ssl = True
                         else:
-                            if next_compute_server["SSL"] in ['true', 'True']:
+                            if next_compute_server["SSL"].lower() != 'false': 
                                 ssl = True
                             else:
                                 ssl = False
@@ -429,14 +426,75 @@ class FaaSr:
                             "Content-Type": "application/json"
                         }
 
+                        # Create body for POST
+                        json_payload = json.dumps(self.payload_dict)
+
                         # Issue POST request
-                        response = requests.post(url=url,
-                                                 json=json.dumps(faasr_dict),
-                                                 headers=headers,
-                                                 verify=ssl)
+                        try:
+                            response = requests.post(url=url,
+                                                    auth=(api_key[0], api_key[1]),
+                                                    json=json_payload,
+                                                    headers=headers,
+                                                    verify=ssl)
+                        except Exception as e:
+                            if type(e) == requests.exceptions.ConnectionError:
+                                err_msg = f"{{\"faasr_trigger\": \"OpenWhisk: Error invoking {faasr_dict['FunctionInvoke']} -- connection error\"}}"
+                                print(err_msg)
+                                sys.exit(1)
+                            else:
+                                err_msg = f"{{\"faasr_trigger\": \"OpenWhisk: Error invoking {faasr_dict['FunctionInvoke']} -- see logs\"}}"
+                                nat_err_msg = err_msg = f"{{\"faasr_trigger\": \"OpenWhisk: Error invoking {faasr_dict['FunctionInvoke']} -- error: {e}\"}}"
+                                print(err_msg)
+                                FaaSr_py.faasr_log(nat_err_msg)
+                                sys.exit(1)
+                        
+                        if response.status_code == 200 or response.status_code == 202:
+                            succ_msg = f"{{\"faasr_trigger\":\"OpenWhisk: Succesfully invoked {faasr_dict['FunctionInvoke']}\"}}"
+                            print(succ_msg)
+                            FaaSr_py.faasr_log(succ_msg)
+                        else:
+                            err_msg = f"{{\"faasr_trigger\":\"OpenWhisk: Error invoking {faasr_dict['FunctionInvoke']} -- status code: {response.status_code}\"}}"
+                            print(err_msg)
+                            FaaSr_py.faasr_log(err_msg)
                         break
+
                     case "Lambda":
-                        print("Lamba trigger not implemented")
+                        print("Lamba trigger not implemented (need to test)")
+                        # Create client for invoking lambda function
+                        lambda_client = boto3.client(
+                            "lambda",
+                            aws_access_key_id=next_compute_server["AccessKey"],
+                            aws_secret_access_key=next_compute_server["SecretKey"],
+                            region_name=next_compute_server["Region"],
+                            )
+
+                        # Invoke lambda function
+                        try:
+                            response = lambda_client.invoke(
+                                FunctionName = invoke_next,
+                                InvokeArgs = json.dumps(self.payload_dict),
+                                InvocationType = "Event"
+                                )
+                        except Exception:
+                                err_msg = f"{{\"faasr_trigger\": \"Error invoking function: {self.payload_dict['FunctionInvoke']} -- check API keys\"}}\n"
+                                print(err_msg)
+                                FaaSr_py.faasr_log(err_msg)     
+                                continue                       
+                        
+                        if 'StatusCode' in response and str(response['StatusCode'])[0] == '2':
+                            succ_msg = f"{{\"faasr_trigger\": \"Successfully invoked: {self.payload_dict['FunctionInvoke']}\"}}\n"
+                            print(succ_msg)
+                            FaaSr_py.faasr_log(succ_msg)
+                        else:
+                            try:
+                                err_msg = f"{{\"faasr_trigger\": \"Error invoking function: {self.payload_dict['FunctionInvoke']} -- error: {response['FunctionError']}\"}}\n"
+                                print(err_msg)
+                                FaaSr_py.faasr_log(err_msg)
+                            except Exception:
+                                err_msg = f"{{\"faasr_trigger\": \"Error invoking function: {self.payload_dict['FunctionInvoke']} -- no response from AWS\"}}\n"
+                                print(err_msg)
+                                FaaSr_py.faasr_log(err_msg)
+
                         break
                     case "GitHubActions":
                         # Get env values for GH actions
