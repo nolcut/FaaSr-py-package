@@ -167,11 +167,11 @@ class FaaSr:
         # If a predecessor has a rank attribute, then we need to ensure
         # That all concurrent invocations of that function have finished
         for pre_func in pre:
-            if "Rank" in self.payload_dict["FunctionList"][pre_func] and len(self.payload_dict["FunctionList"][pre_func]) != 0:
+            if "Rank" in self.payload_dict["FunctionList"][pre_func] and len(self.payload_dict["FunctionList"][pre_func]["Rank"]) != 0:
                 parts = self.payload_dict["FunctionList"][pre_func]["Rank"].split("/")
                 pre = pre.remove(pre_func)
                 if len(parts) != 2:
-                    err_msg = f'{{\"faasr_abort_on_multiple_invocation\": \"Error with rank field in function: {self.payload_dict["FunctionList"][pre_func]}\"}}'
+                    err_msg = f'{{\"faasr_abort_on_multiple_invocation\": \"Error with rank field in function: {pre_func}\"}}'
                     print(err_msg)
                     sys.exit(1)
                 for rank in range(1, parts[1] + 1):
