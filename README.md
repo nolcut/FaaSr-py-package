@@ -48,11 +48,11 @@ List of FaaS compute servers. Each FaaS type requires different attributes:
 Required: FaaSType, UserName, ActionRepoName, Branch
 
 #### OpenWhisk:
-Required: FaaSType, Endpoint, Namespace, API.key
+Required: FaaSType, Endpoint, Namespace  
 Optional: SSL
 
 #### AWS Lambda:
-Required: FaaSType, Region, AccessKey, SecretKey
+Required: FaaSType, Region
 
 ## “DataStores”
 List of your S3 data stores
@@ -65,7 +65,7 @@ Other attributes: Writable
 List of actions in the workflow
 
 **For each action**  
-Required: FaaSServer, FunctionName, InvokeNext, Arguments
+Required: FaaSServer, FunctionName, InvokeNext, Arguments  
 Optional: Rank
 
 ## “ActionContainers” 
