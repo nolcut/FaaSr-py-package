@@ -214,7 +214,7 @@ class FaaSr:
         # 4) download the file from S3
 
         # to-do faasr acquire lock
-        self.faasr_acquire()
+        FaaSr_py.faasr_acquire(self)
 
         random_number = random.randint(1, 2**31 - 1)
 
@@ -253,7 +253,7 @@ class FaaSr:
         )
 
         # Release the lock
-        self.faasr_release()
+        FaaSr_py.faasr_release(self)
 
         # Abort if current function was not the first to write to the candidate set
         with open(candidate_path, "a") as updated_candidate_file:
