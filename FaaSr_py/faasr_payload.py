@@ -225,7 +225,7 @@ class FaaSr:
 
         # Get all of the objects in S3 with the prefix {id_folder}/{FunctionInvoke}.candidate
         s3_response = s3_client.list_objects_v2(
-            Bucket=s3_log_info["Bucket"], prefix=candidate_path
+            Bucket=s3_log_info["Bucket"], Prefix=candidate_path
         )
         if len(s3_response["Contents"]) != 0:
             # Download candidate set
@@ -275,7 +275,6 @@ class FaaSr:
             logging_server = self.payload_dict["LoggingDataStore"]
         return logging_server
     
-
     def run_user_function(self, imported_functions):
         """
         This method runs the user's code that was imported
