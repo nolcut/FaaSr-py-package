@@ -237,14 +237,16 @@ class FaaSr:
                 Filename=candidate_path,
             )
 
-        # Append random number to candidate file
-        with open(candidate_path, "a") as candidate_file:
-            candidate_file.write(str(random_number) + "\n")
+        # Write unique random number to candidate file
+        with open(candidate_path, "a") as cf:
+            cf.write(str(random_number) + "\n")
+
+        with open(candidate_path, "rb") as cf:
             # Upload candidate file back to S3
             s3_client.put_object(
-                Body=candidate_file, Key=candidate_path, Bucket=s3_log_info["Bucket"]
+                Body=cf, Key=candidate_path, Bucket=s3_log_info["Bucket"]
             )
-
+            
         # Download candidate file to local directory again
         if os.path.exists(candidate_path):
             os.remove(candidate_path)
@@ -256,7 +258,7 @@ class FaaSr:
         FaaSr_py.faasr_release(self)
 
         # Abort if current function was not the first to write to the candidate set
-        with open(candidate_path, "a") as updated_candidate_file:
+        with open(candidate_path, "r") as updated_candidate_file:
             first_line = updated_candidate_file.readline().strip()
             first_line = int(first_line)
         if random_number != first_line:
