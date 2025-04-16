@@ -227,7 +227,7 @@ class FaaSr:
         s3_response = s3_client.list_objects_v2(
             Bucket=s3_log_info["Bucket"], Prefix=candidate_path
         )
-        if len(s3_response["Contents"]) != 0:
+        if 'Contents' in s3_response and len(s3_response["Contents"]) != 0:
             # Download candidate set
             if os.path.exists(candidate_path):
                 os.remove(candidate_path)          
