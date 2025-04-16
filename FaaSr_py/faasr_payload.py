@@ -239,7 +239,7 @@ class FaaSr:
 
         # Append random number to candidate file
         with open(candidate_path, "a") as candidate_file:
-            candidate_file.write(random_number + "\n")
+            candidate_file.write(str(random_number) + "\n")
 
         # Upload candidate file back to S3
         s3_client.put_object(
