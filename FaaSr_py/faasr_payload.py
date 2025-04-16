@@ -240,11 +240,10 @@ class FaaSr:
         # Append random number to candidate file
         with open(candidate_path, "a") as candidate_file:
             candidate_file.write(str(random_number) + "\n")
-
-        # Upload candidate file back to S3
-        s3_client.put_object(
-            Body=candidate_file, Key=candidate_path, Bucket=s3_log_info["Bucket"]
-        )
+            # Upload candidate file back to S3
+            s3_client.put_object(
+                Body=candidate_file, Key=candidate_path, Bucket=s3_log_info["Bucket"]
+            )
 
         # Download candidate file to local directory again
         if os.path.exists(candidate_path):
