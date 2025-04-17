@@ -1,5 +1,6 @@
 import json
 import sys
+import re
 from collections import defaultdict
 from jsonschema import validate
 from jsonschema.exceptions import ValidationError
@@ -75,6 +76,7 @@ def check_dag(payload: dict):
         if isinstance(invoke_next, str):
             invoke_next = [invoke_next]
         for child in invoke_next:
+            child = re.sub(r"\(.*", "", child)
             adj_graph[func].append(child)
 
     # Initialize empty recursion call stack
@@ -108,9 +110,9 @@ def check_dag(payload: dict):
 
     # Check if all of the functions have been visited by the DFS
     # If not, then there is an unreachable state in the graph
-    for func in payload['FunctionList'].keys():
-        if func not in visited:
-            err = '{\"check_workflow_cycle\":\"unreachable state is found in ' + func + '\"}\n'
+    for func in payload['FunctionList']:
+        if func.split('(')[0] not in visited:
+            err = '{\"check_workflow_cycle\":\"unreachable state found: ' + func + '\"}\n'
             print(err)
             sys.exit(1)
 

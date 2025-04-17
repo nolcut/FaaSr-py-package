@@ -301,7 +301,7 @@ class FaaSr:
         # Run user function
         try:
             user_function(**user_args)
-        except Exception:
+        except Exception as e:
             nat_err_msg = f'"faasr_run_user_function":Errors in the user function {repr(e)}'
             err_msg = '{"faasr_run_user_function":"Errors in the user function: ' + str(self.payload_dict["FunctionInvoke"]) + ', check the log for the detail "}\n'
             result_2 = FaaSr_py.faasr_log(nat_err_msg)
@@ -369,7 +369,7 @@ class FaaSr:
             parts = re.split(r"[()]", next_function)
             if len(parts) > 1:
                 next_function = parts[0]
-                rank_num = parts[1]
+                rank_num = int(parts[1])
             else:
                 rank_num = 1
 
