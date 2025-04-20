@@ -302,7 +302,7 @@ class FaaSr:
         try:
             user_function(**user_args)
         except Exception as e:
-            nat_err_msg = f'"faasr_run_user_function":Errors in the user function {repr(e)}'
+            nat_err_msg = f'"faasr_run_user_function":Errors in the user function: {e}'
             err_msg = '{"faasr_run_user_function":"Errors in the user function: ' + str(self.payload_dict["FunctionInvoke"]) + ', check the log for the detail "}\n'
             result_2 = FaaSr_py.faasr_log(nat_err_msg)
             print(nat_err_msg)
