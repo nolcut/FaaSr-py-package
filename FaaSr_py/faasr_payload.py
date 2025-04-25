@@ -94,9 +94,10 @@ class FaaSr:
         This method initializes a faasr log folder if one has not already been created
         """
         # Create invocation ID if one is not already present
-        if validate_uuid(self.payload_dict["InvocationID"]) == False:
-            ID = uuid.uuid4()
-            self.payload_dict["InvocationID"] = str(ID)
+        if self.payload_dict["InvocationID"] is None or len(self.payload_dict["InvocationID"]) == 0:
+            if validate_uuid(self.payload_dict["InvocationID"]) == False:
+                ID = uuid.uuid4()
+                self.payload_dict["InvocationID"] = str(ID)
 
         # Log invocation ID
         faasr_msg = f'{{"init_log_folder":"InvocationID for the workflow: {self.payload_dict["InvocationID"]}"}}\n'
@@ -438,7 +439,7 @@ class FaaSr:
                         try:
                             response = requests.post(url=url,
                                                     auth=(api_key[0], api_key[1]),
-                                                    json=json_payload,
+                                                    data=json_payload,
                                                     headers=headers,
                                                     verify=ssl)
                         except Exception as e:

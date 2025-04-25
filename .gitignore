@@ -4,5 +4,3 @@ __pycache__/
 build/
 FaaSr_py.egg-info/
 .vscode/
-venv/
-dist/
