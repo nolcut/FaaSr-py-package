@@ -14,7 +14,7 @@ from .graph_functions import validate_json
 
 
 class FaaSr:
-    def __init__(self, faasr_payload: json):
+    def __init__(self, faasr_payload):
         if validate_json(faasr_payload):
             self.payload_dict = faasr_payload
         else:

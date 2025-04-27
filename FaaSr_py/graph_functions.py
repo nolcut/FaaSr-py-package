@@ -10,6 +10,9 @@ def validate_json(payload):
     """
     This method is used to verify that the JSON payload is compliant with the FaaSr schema
     """
+    if isinstance(payload, str):
+        payload = json.loads(payload)
+        
     #Open FaaSr schema
     # to-do: schema path
     with open('FaaSr.schema.json') as f:
@@ -26,7 +29,7 @@ def validate_json(payload):
 
 def is_cyclic(adj_graph, curr, visited, stack):
     """This recursive function checks if there is a cycle in a directed
-    graph specified by a dictionary of (parent: list[child]) pairs
+    graph specified by an adjacency list
 
     parameters:
         adj_graph(dict): adjacency list for graph
@@ -60,7 +63,7 @@ def is_cyclic(adj_graph, curr, visited, stack):
     return False
 
 
-def check_dag(payload: dict):
+def check_dag(payload):
     """
     This method checks for cycles, repeated function names, or unreachable nodes in the workflow
     and aborts if it finds any
@@ -120,7 +123,7 @@ def check_dag(payload: dict):
     
 
 def predecessors_list(adj_graph):
-    """This function returns creates a dict mapping functions to their predecessor functions
+    """This function returns a map of action predecessor pairs
     
     parameters:
         adj_graph(dict): adjacency list for graph (function: successor)
