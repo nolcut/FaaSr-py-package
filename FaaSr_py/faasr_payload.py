@@ -18,7 +18,8 @@ class FaaSr:
         if validate_json(faasr_payload):
             self.payload_dict = faasr_payload
         else:
-            ValueError("Payload failed to validate.")
+            ValueError("Payload validation error")
+        # self.branches = []
 
     def __getitem__(self, key):
         try:
@@ -222,7 +223,7 @@ class FaaSr:
         if not os.path.isdir(id_folder):
             os.makedirs(id_folder, exist_ok=True)
 
-        candidate_path = f"{id_folder}/{self.payload_dict['FunctionInvoke']}.candidate"
+        candidate_path = f"/tmp/{id_folder}/{self.payload_dict['FunctionInvoke']}.candidate"
 
         # Get all of the objects in S3 with the prefix {id_folder}/{FunctionInvoke}.candidate
         s3_response = s3_client.list_objects_v2(
@@ -291,7 +292,7 @@ class FaaSr:
             # add faasr_py to user_function's namespace
             user_function.__globals__['FaaSr_py'] = FaaSr_py
         else:
-            err_msg = '{"faasr_run_user_function":"Cannot find Function ' + func_name + ', check the name and sources"}\n'
+            err_msg = f'{{"faasr_run_user_function":"Cannot find Function {func_name} check the name and sources"}}\n'
             result_2 = FaaSr_py.faasr_log(err_msg)
             print(err_msg)
             sys.exit(1)
@@ -323,7 +324,7 @@ class FaaSr:
                 rank = rank_unsplit.split("/")[0]
                 faasr_dict["FunctionInvoke"] = f"{faasr_dict['FunctionInvoke']}.{rank}"
         file_name = f"{faasr_dict['FunctionInvoke']}.done"
-        file_path = f"{log_folder}/{file_name}"
+        file_path = f"/tmp/{log_folder}/{file_name}"
         with open(file_path, "w") as f:
             f.write("True")
         

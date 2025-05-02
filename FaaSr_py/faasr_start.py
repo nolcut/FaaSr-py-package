@@ -14,7 +14,7 @@ def faasr_start(faasr_payload):
     # If the payload is a DAG, then this function returns a predecessor list for the workflow
     # If the payload is not a DAG, then the action aborts
     pre = check_dag(faasr_obj.get_payload_dict())
-
+    
     # Verfies the validity of S3 data stores, checvking the server status and ensuring that the specified bucket exists
     # If any of the S3 endpoints are invalid or any data store server are unreachable, the action aborts
     faasr_obj.s3_check()
