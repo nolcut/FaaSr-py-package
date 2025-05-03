@@ -133,8 +133,6 @@ def anyone_else_interested(target_s3, flag_path, flag_name):
 
     # Get a list of flag names
     check_pool = s3_client.list_objects_v2(Bucket=target_s3['Bucket'], Prefix=flag_path)
-    pool = [x['Key'] for x in check_pool['Contents']]
-
     # If our flag is in S3 and is the only one, return false
     if(flag_name in pool and len(pool) == 1):
         return False

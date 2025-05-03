@@ -197,6 +197,7 @@ class FaaSr:
         for func in pre:
             # check if all of the predecessor func.done objects exist
             done_file = f"{id_folder}/{func}.done"
+
             # if the object does exist, do nothing
             # if it does not exist, then the current function still is waiting for
             # a predecessor and must wait
@@ -215,16 +216,15 @@ class FaaSr:
         # 3) upload the file back to the S3 bucket
         # 4) download the file from S3
 
-        # to-do faasr acquire lock
         FaaSr_py.faasr_acquire(self)
 
         random_number = random.randint(1, 2**31 - 1)
 
-        if not os.path.isdir(id_folder):
-            os.makedirs(id_folder, exist_ok=True)
+        if not os.path.isdir(f"/tmp/{id_folder}"):
+            os.makedirs(f"/tmp/{id_folder}", exist_ok=True)
 
         candidate_path = f"{id_folder}/{self.payload_dict['FunctionInvoke']}.candidate"
-        candidate_temp_path = f"/tmp{candidate_path}"
+        candidate_temp_path = f"/tmp/{candidate_path}"
 
         # Get all of the objects in S3 with the prefix {id_folder}/{FunctionInvoke}.candidate
         s3_response = s3_client.list_objects_v2(
@@ -237,7 +237,7 @@ class FaaSr:
             s3_client.download_file(
                 Bucket=s3_log_info["Bucket"],
                 Key=candidate_path,
-                Filename=candidate_path,
+                Filename=candidate_temp_path,
             )
 
         # Write unique random number to candidate file
@@ -313,11 +313,12 @@ class FaaSr:
             sys.exit(1)
 
         # At this point, the Action has finished the invocation of the User Function
-        # We flag this by uploading a file with the name FunctionInvoke.done with contents True to the S3 logs folder
+        # We flag this by uploading a file with the name FunctionInvoke.done to the S3 logs folder
         # Check if directory already exists. If not, create one
-        log_folder = f"/tmp/{faasr_dict['FaaSrLog']}/{faasr_dict['InvocationID']}"
-        if not os.path.isdir(log_folder):
-            os.makedirs(log_folder)
+        log_folder = f"{faasr_dict['FaaSrLog']}/{faasr_dict['InvocationID']}"
+        log_folder_path = f"/tmp/{log_folder}/{faasr_dict['FunctionInvoke']}/flag/"
+        if not os.path.isdir(log_folder_path):
+            os.makedirs(log_folder_path)
         curr_action = faasr_dict["FunctionInvoke"]
         if "Rank" in faasr_dict["FunctionList"][curr_action]:
             rank_unsplit = faasr_dict["FunctionList"][curr_action]["Rank"]
@@ -325,13 +326,12 @@ class FaaSr:
                 rank = rank_unsplit.split("/")[0]
                 faasr_dict["FunctionInvoke"] = f"{faasr_dict['FunctionInvoke']}.{rank}"
         file_name = f"{faasr_dict['FunctionInvoke']}.done"
-        file_path = f"/{log_folder}/{file_name}"
-        with open(file_path, "w") as f:
+        with open(f"{log_folder_path}/{file_name}", "w") as f:
             f.write("True")
-        
+
         # Put .done file in S3
         FaaSr_py.faasr_put_file(
-            local_folder=log_folder,
+            local_folder=log_folder_path,
             local_file=file_name,
             remote_folder=log_folder,
             remote_file=file_name,
@@ -400,9 +400,7 @@ class FaaSr:
                 next_server_type = next_compute_server["FaaSType"]
 
                 match(next_server_type):
-                    # to-do: OW and lambda testing
                     case "OpenWhisk":
-                        print("OpenWhisk trigger not implemented (need to test)")
                         # Get ow credentials
                         endpoint = next_compute_server["Endpoint"]
                         api_key = next_compute_server["API.key"]
@@ -467,7 +465,6 @@ class FaaSr:
                         break
 
                     case "Lambda":
-                        print("Lamba trigger not implemented (need to test)")
                         # Create client for invoking lambda function
                         lambda_client = boto3.client(
                             "lambda",
@@ -479,12 +476,11 @@ class FaaSr:
                         # Invoke lambda function
                         try:
                             response = lambda_client.invoke(
-                                FunctionName = invoke_next,
-                                InvokeArgs = json.dumps(self.payload_dict),
-                                InvocationType = "Event"
+                                FunctionName = next_function,
+                                Payload = json.dumps(self.payload_dict),
                                 )
-                        except Exception:
-                                err_msg = f"{{\"faasr_trigger\": \"Error invoking function: {self.payload_dict['FunctionInvoke']} -- check API keys\"}}\n"
+                        except Exception as e:   
+                                err_msg = f"{{\"faasr_trigger\": \"Error invoking function: {self.payload_dict['FunctionInvoke']} -- {e}\"}}\n"
                                 print(err_msg)
                                 FaaSr_py.faasr_log(err_msg)     
                                 continue                       
