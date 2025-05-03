@@ -32,6 +32,8 @@ def faasr_get_file(local_file, remote_file, server_name="", local_folder=".", re
     local_folder = re.sub(r'/+', '/', local_folder.rstrip('/'))
     local_file = re.sub(r'/+', '/', local_file.rstrip('/'))
 
+    get_file = f"{local_folder}/{local_file}"
+
     if remote_folder == "":
         get_file_s3 = remote_file
     else:
