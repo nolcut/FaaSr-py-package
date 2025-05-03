@@ -29,12 +29,13 @@ def faasr_log(log_message):
     )
 
     # Path to log file
-    log_folder = f"/tmp/{payload['FaaSrLog']}/{payload['InvocationID']}"
+    log_folder = f"{payload['FaaSrLog']}/{payload['InvocationID']}"
     log_file = f"{log_folder}/{payload['FunctionInvoke']}.txt"
+    log_path = f"/tmp/{log_file}"
 
-    if not os.path.isdir(log_folder):
+    if not os.path.isdir(f"/tmp/{log_folder}"):
         try:
-            os.makedirs(log_folder)
+            os.makedirs(f"/tmp/{log_folder}")
         except FileExistsError:
             print("File exists: cannot make log_folder (faasr_log)")
 
@@ -44,19 +45,19 @@ def faasr_log(log_message):
 
     # Download the log if it exists
     if "Content" in check_log_file and len(check_log_file["Content"]) != 0:
-        if os.path.exists(log_file):
-            os.remove(log_file)
+        if os.path.exists(log_path):
+            os.remove(log_path)
         s3_client.download_file(
-            Bucket=log_server["Bucket"], Key=log_file, Filename=log_file
+            Bucket=log_server["Bucket"], Key=log_file, Filename=log_path
         )
 
     # Write to log
     logs = f"{log_message}\n"
-    with open(log_file, "a") as f:
+    with open(log_path, "a") as f:
         f.write(logs)
 
     # Upload log back to S3
-    with open(log_file, "rb") as log_data:
+    with open(log_path, "rb") as log_data:
         s3_client.put_object(Bucket=log_server["Bucket"], Body=log_data, Key=log_file)
 
     # to-do logging for function completion

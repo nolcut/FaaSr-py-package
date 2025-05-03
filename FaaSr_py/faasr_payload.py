@@ -121,7 +121,7 @@ class FaaSr:
             self.payload_dict["FaaSrLog"] = "FaaSrLog"
 
         # Get name for log folder
-        idfolder = f"/tmp/{self.payload_dict["FaaSrLog"]}/{self.payload_dict["InvocationID"]}/"
+        idfolder = f"{self.payload_dict["FaaSrLog"]}/{self.payload_dict["InvocationID"]}/"
         
         # Check contents of log folder
         check_id_folder = s3_client.list_objects_v2(
