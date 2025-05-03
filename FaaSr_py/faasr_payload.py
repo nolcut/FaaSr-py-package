@@ -223,7 +223,8 @@ class FaaSr:
         if not os.path.isdir(id_folder):
             os.makedirs(id_folder, exist_ok=True)
 
-        candidate_path = f"/tmp/{id_folder}/{self.payload_dict['FunctionInvoke']}.candidate"
+        candidate_path = f"{id_folder}/{self.payload_dict['FunctionInvoke']}.candidate"
+        candidate_temp_path = f"/tmp{candidate_path}"
 
         # Get all of the objects in S3 with the prefix {id_folder}/{FunctionInvoke}.candidate
         s3_response = s3_client.list_objects_v2(
@@ -231,8 +232,8 @@ class FaaSr:
         )
         if 'Contents' in s3_response and len(s3_response["Contents"]) != 0:
             # Download candidate set
-            if os.path.exists(candidate_path):
-                os.remove(candidate_path)          
+            if os.path.exists(candidate_temp_path):
+                os.remove(candidate_temp_path)          
             s3_client.download_file(
                 Bucket=s3_log_info["Bucket"],
                 Key=candidate_path,
@@ -240,27 +241,27 @@ class FaaSr:
             )
 
         # Write unique random number to candidate file
-        with open(candidate_path, "a") as cf:
+        with open(candidate_temp_path, "a") as cf:
             cf.write(str(random_number) + "\n")
 
-        with open(candidate_path, "rb") as cf:
+        with open(candidate_temp_path, "rb") as cf:
             # Upload candidate file back to S3
             s3_client.put_object(
                 Body=cf, Key=candidate_path, Bucket=s3_log_info["Bucket"]
             )
             
         # Download candidate file to local directory again
-        if os.path.exists(candidate_path):
-            os.remove(candidate_path)
+        if os.path.exists(candidate_temp_path):
+            os.remove(candidate_temp_path)
         s3_client.download_file(
-            Bucket=s3_log_info["Bucket"], Key=candidate_path, Filename=candidate_path
+            Bucket=s3_log_info["Bucket"], Key=candidate_path, Filename=candidate_temp_path
         )
 
         # Release the lock
         FaaSr_py.faasr_release(self)
 
         # Abort if current function was not the first to write to the candidate set
-        with open(candidate_path, "r") as updated_candidate_file:
+        with open(candidate_temp_path, "r") as updated_candidate_file:
             first_line = updated_candidate_file.readline().strip()
             first_line = int(first_line)
         if random_number != first_line:
