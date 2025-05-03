@@ -29,7 +29,7 @@ def faasr_log(log_message):
     )
 
     # Path to log file
-    log_folder = f"{payload['FaaSrLog']}/{payload['InvocationID']}"
+    log_folder = f"/tmp/{payload['FaaSrLog']}/{payload['InvocationID']}"
     log_file = f"{log_folder}/{payload['FunctionInvoke']}.txt"
 
     if not os.path.isdir(log_folder):

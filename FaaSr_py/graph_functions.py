@@ -14,7 +14,7 @@ def validate_json(payload):
         payload = json.loads(payload)
         
     #Open FaaSr schema
-    with open('/tmp/FaaSr.schema.json', "r") as f:
+    with open('FaaSr.schema.json', "r") as f:
         schema = json.load(f)
     
     #Compare payload against FaaSr schema and except if they do not match

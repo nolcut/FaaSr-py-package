@@ -121,7 +121,7 @@ class FaaSr:
             self.payload_dict["FaaSrLog"] = "FaaSrLog"
 
         # Get name for log folder
-        idfolder = f"{self.payload_dict["FaaSrLog"]}/{self.payload_dict["InvocationID"]}/"
+        idfolder = f"/tmp/{self.payload_dict["FaaSrLog"]}/{self.payload_dict["InvocationID"]}/"
         
         # Check contents of log folder
         check_id_folder = s3_client.list_objects_v2(
@@ -314,7 +314,7 @@ class FaaSr:
         # At this point, the Action has finished the invocation of the User Function
         # We flag this by uploading a file with the name FunctionInvoke.done with contents True to the S3 logs folder
         # Check if directory already exists. If not, create one
-        log_folder = f"{faasr_dict['FaaSrLog']}/{faasr_dict['InvocationID']}"
+        log_folder = f"/tmp/{faasr_dict['FaaSrLog']}/{faasr_dict['InvocationID']}"
         if not os.path.isdir(log_folder):
             os.makedirs(log_folder)
         curr_action = faasr_dict["FunctionInvoke"]
@@ -324,7 +324,7 @@ class FaaSr:
                 rank = rank_unsplit.split("/")[0]
                 faasr_dict["FunctionInvoke"] = f"{faasr_dict['FunctionInvoke']}.{rank}"
         file_name = f"{faasr_dict['FunctionInvoke']}.done"
-        file_path = f"/tmp/{log_folder}/{file_name}"
+        file_path = f"/{log_folder}/{file_name}"
         with open(file_path, "w") as f:
             f.write("True")
         
