@@ -1,11 +1,10 @@
-# What is FaaSr_py
-FaaSr_py is a package for Python that makes it easier to orchestrate serverless workflows by abstracting away provider specific APIs and allowing for DAG defined execution flow. 
-Currently, FaaSr_py supports three FaaS platforms: GitHub actions, OpenWhisk (soon), and AWS Lambda (soon). Functions within the workflow can be written in either R or Python. 
-Every function in the DAG is a container that will run on the user’s FaaS server of choice. 
-This package provides backend tools for S3 and DAG validation, package installation, function fetching and execution, a triggering mechanism for the next functions in the DAG, 
-and other validation functions to ensure proper workflow behavior. Workflows leverages S3 for persistent data-storage, with a server side API to orchestrate I/O within user functions.
+# What is FaaSr
+FaaSr is a serverless framework that makes it easier to orchestrate workflows by abstracting away provider specific APIs and allowing for DAG defined execution flow. 
+Currently, FaaSr supports three FaaS platforms: GitHub actions, OpenWhisk (soon), and AWS Lambda (soon). Functions within the workflow can be written in either R or Python and are ran in a FaaSr container on the user’s FaaS server of choice. Workflows leverage S3 for persistent data-storage, with a server side API to orchestrate I/O within user functions.
+This package provides backend Python tools for S3 and DAG validation, package installation, function fetching and execution, a triggering mechanism for the next functions in the DAG, 
+and other validation functions to ensure proper workflow behavior.
 
-# Using FaaSr_py
+# Using
 To use FaaSr_py, you simply need to create a workflow JSON (see below) and host your functions on GitHub. Then, you can register, invoke, and set triggers for your workflows using the CLI (soon).    
 
 FaaSr_py abstracts away S3 interactions, so all you need to do is use the serverside API to perform I/O interactions within your functions. The available functions are the following:
