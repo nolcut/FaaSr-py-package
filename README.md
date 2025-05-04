@@ -5,7 +5,7 @@ This package provides backend Python tools for S3 and DAG validation, package in
 and other validation functions to ensure proper workflow behavior.
 
 # Using
-To use FaaSr_py, you simply need to create a workflow JSON (see below) and host your functions on GitHub. Then, you can register, invoke, and set triggers for your workflows using the CLI (soon).    
+To use FaaSr, you simply need to create a workflow JSON (see below) and host your functions on GitHub. Then, you can register, invoke, and set triggers for your workflows using the CLI (soon).    
 
 FaaSr_py abstracts away S3 interactions, so all you need to do is use the serverside API to perform I/O interactions within your functions. The available functions are the following:
 
