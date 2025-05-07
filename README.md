@@ -39,8 +39,12 @@ The GUI for creating a workflow can be found here: [FaaSr-JSON-Builder Shiny app
 4. Subsequent actions are invoked
 
 # Useful containers
-For running Python functions on GitHub Action servers, you can use the following container: 
+For running Python functions on GitHub Action, you can use the following container: 
 ```
-ghcr.io/nolcut/github-actions-python:v0.1.1
+ghcr.io/nolcut/github-actions-python:0.1.3
+```
+For running Python functions on OpenWhisk instances, use the following: 
+```
+nolcut/ow-faasr-image:0.1.0
 ```
 
