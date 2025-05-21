@@ -49,7 +49,7 @@ class FaaSr:
 
     def s3_check(self):
         """
-        This method ensures that all of the S3 data stores are valid and reachable
+        Ensures that all of the S3 data stores are valid and reachable
         """
         
         # Iterate through all of the data stores
@@ -92,7 +92,7 @@ class FaaSr:
 
     def init_log_folder(self):
         """
-        This method initializes a faasr log folder if one has not already been created
+        Initializes a faasr log folder if one has not already been created
         """
         # Create invocation ID if one is not already present
         if self.payload_dict["InvocationID"] is None or len(self.payload_dict["InvocationID"]) == 0:
@@ -138,7 +138,7 @@ class FaaSr:
 
     def abort_on_multiple_invocations(self, pre):
         """
-        This method is invoked when the current function has multiple predecessors
+        Invoked when the current function has multiple predecessors
         and aborts if they have not finished or the current function instance was not
         the first to write to the candidate set
         """
@@ -268,20 +268,9 @@ class FaaSr:
             res_msg = '{"abort_on_multiple_invocations":"not the last trigger invoked - random number does not match"}\n'
             print(res_msg)
             sys.exit(1)
-
-    def get_logging_server(self):
-        """
-        Returns the default logging data store for the payload
-        """
-        if self.payload_dict["LoggingDataStore"] is None:
-            logging_server = self.payload_dict["DefaultDataStore"]
-        else:
-            logging_server = self.payload_dict["LoggingDataStore"]
-        return logging_server
-    
     def run_user_function(self, imported_functions):
         """
-        This method runs the user's code that was imported
+        Runs the user's code that was imported
         """
         faasr_dict = self.payload_dict
         curr_action = faasr_dict["FunctionInvoke"]
@@ -336,18 +325,6 @@ class FaaSr:
             remote_folder=log_folder,
             remote_file=file_name,
         )
-    
-    def get_user_function_args(self):
-        """
-        Returns function arguments
-        """
-        user_action = self.payload_dict["FunctionInvoke"]
-
-        args = self.payload_dict["FunctionList"][user_action]["Arguments"]
-        if args is None:
-            return []
-        else:
-            return args
         
     def trigger(self):
         """
@@ -582,10 +559,27 @@ class FaaSr:
                             print(err_msg)
                             FaaSr_py.faasr_log(err_msg)
 
+    def get_user_function_args(self):
+        """
+        Returns function arguments
+        """
+        user_action = self.payload_dict["FunctionInvoke"]
 
-
-
-                
+        args = self.payload_dict["FunctionList"][user_action]["Arguments"]
+        if args is None:
+            return []
+        else:
+            return args
+        
+    def get_logging_server(self):
+        """
+        Returns the default logging data store for the payload
+        """
+        if self.payload_dict["LoggingDataStore"] is None:
+            logging_server = self.payload_dict["DefaultDataStore"]
+        else:
+            logging_server = self.payload_dict["LoggingDataStore"]
+        return logging_server
 
 
 
