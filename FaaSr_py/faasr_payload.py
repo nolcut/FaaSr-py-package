@@ -268,6 +268,7 @@ class FaaSr:
             res_msg = '{"abort_on_multiple_invocations":"not the last trigger invoked - random number does not match"}\n'
             print(res_msg)
             sys.exit(1)
+
     def run_user_function(self, imported_functions):
         """
         Runs the user's code that was imported
@@ -294,10 +295,9 @@ class FaaSr:
         try:
             user_function(**user_args)
         except Exception as e:
-            nat_err_msg = f'"faasr_run_user_function":Errors in the user function: {e}'
+            nat_err_msg = f'{{"faasr_run_user_function":Errors in the user function: {e}}}'
             err_msg = '{"faasr_run_user_function":"Errors in the user function: ' + str(self.payload_dict["FunctionInvoke"]) + ', check the log for the detail "}\n'
             result_2 = FaaSr_py.faasr_log(nat_err_msg)
-            print(nat_err_msg)
             print(err_msg)
             sys.exit(1)
 
@@ -325,6 +325,7 @@ class FaaSr:
             remote_folder=log_folder,
             remote_file=file_name,
         )
+
         
     def trigger(self):
         """

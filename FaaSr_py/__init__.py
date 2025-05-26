@@ -13,6 +13,7 @@ from .get_folder_list import faasr_get_folder_list
 from .log import faasr_log
 from .faasr_lock import faasr_acquire
 from .faasr_lock import faasr_release
+from .rank import faasr_rank
 
 __all__ = [
     # modules
@@ -20,6 +21,7 @@ __all__ = [
     "get_file",
     "delete_file",
     "put_file",
+    "rank",
     "get_folder_list",
     "faasr_payload",
     "faasr_lock",
@@ -36,6 +38,7 @@ __all__ = [
     "faasr_get_folder_list",
     "faasr_log",
     "faasr_put_file",
+    "faasr_rank",
     "faasr_release",
     "faasr_acquire"
 ]
